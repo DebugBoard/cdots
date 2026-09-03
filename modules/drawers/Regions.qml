@@ -17,6 +17,10 @@ Region {
     readonly property bool barOnRight: win.contentItem.Config.bar.position === PanelPosition.Right
     readonly property bool sidebarOnLeft: win.contentItem.Config.sidebar.position === PanelPosition.Left
 
+    // Gap between the sidebar's screen edge and the drawer area, so the sidebar panels'
+    // masks reach the edge. Just the border, unless the bar is docked on that same side.
+    readonly property real sidebarOuterInset: sidebarOnLeft ? panels.x : win.width - (panels.x + panels.width)
+
     x: (barOnRight ? clampedThickness : bar.clampedWidth) + win.dragMaskPadding
     y: clampedThickness + win.dragMaskPadding
     width: win.width - bar.clampedWidth - clampedThickness - win.dragMaskPadding * 2
@@ -40,7 +44,7 @@ Region {
 
         panel: root.panels.sessionWrapper
         x: root.sidebarOnLeft ? 0 : root.win.width - width
-        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
+        width: panel.width * (1 - root.panels.session.offsetScale) + root.sidebarOuterInset + sidebarRegion.width
     }
 
     R {
@@ -48,13 +52,13 @@ Region {
 
         panel: root.panels.sidebar
         x: root.sidebarOnLeft ? 0 : root.win.width - width
-        width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.borderThickness
+        width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.sidebarOuterInset
     }
 
     R {
         panel: root.panels.osdWrapper
         x: root.sidebarOnLeft ? 0 : root.win.width - width
-        width: panel.width * (1 - root.panels.osd.offsetScale) + root.borderThickness + sessionRegion.width
+        width: panel.width * (1 - root.panels.osd.offsetScale) + root.sidebarOuterInset + sessionRegion.width
     }
 
     R {
@@ -70,8 +74,12 @@ Region {
     }
 
     R {
+        // Trails the reveal so the mask never covers more than the popout actually shows
+        readonly property real revealed: panel.width * (1 - root.panels.popoutsWrapper.offsetScale)
+
         panel: root.panels.popoutsWrapper
-        width: panel.width * (1 - root.panels.popoutsWrapper.offsetScale)
+        x: panel.x + root.panels.x + (root.barOnRight ? panel.width - revealed : 0)
+        width: revealed
     }
 
     component R: Region {

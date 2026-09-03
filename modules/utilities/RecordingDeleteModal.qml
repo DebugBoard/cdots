@@ -15,6 +15,8 @@ Loader {
 
     required property var props
     required property matrix4x4 deformMatrix
+    // Docks to the same screen edge as the sidebar
+    readonly property bool onLeft: Config.sidebar.position === PanelPosition.Left
 
     asynchronous: true
     anchors.fill: parent
@@ -33,11 +35,21 @@ Loader {
         onClicked: root.props.recordingConfirmDelete = ""
 
         Item {
+            id: scrim
+
             anchors.fill: parent
             anchors.margins: -Tokens.padding.large
-            anchors.rightMargin: -Tokens.padding.large - Config.border.thickness
+            anchors.leftMargin: root.onLeft ? -Tokens.padding.large - Config.border.thickness : -Tokens.padding.large
+            anchors.rightMargin: root.onLeft ? -Tokens.padding.large : -Tokens.padding.large - Config.border.thickness
             anchors.bottomMargin: -Tokens.padding.large - Config.border.thickness
             opacity: 0.5
+
+            // Drawn bleeding into the panel's outer bottom corner, so mirror the whole
+            // thing rather than reversing every curve and gradient by hand
+            transform: Scale {
+                origin.x: scrim.width / 2
+                xScale: root.onLeft ? -1 : 1
+            }
 
             StyledRect {
                 anchors.fill: parent

@@ -26,12 +26,15 @@ CustomMouseArea {
     readonly property bool barOnRight: Config.bar.position === PanelPosition.Right
     readonly property bool sidebarOnLeft: Config.sidebar.position === PanelPosition.Left
 
-    // Sign of a drag that opens the panel, i.e. dragging away from the edge it docks to
+    // Flip the drag axis when a panel is docked opposite its default side, so the
+    // thresholds below keep their original meaning: a drag to the right opens the bar,
+    // a drag to the left opens the sidebar
     readonly property int barOpenDir: barOnRight ? -1 : 1
-    readonly property int sidebarOpenDir: sidebarOnLeft ? 1 : -1
+    readonly property int sidebarOpenDir: sidebarOnLeft ? -1 : 1
 
     // Bounds of the area the drawers live in: the screen edges, minus the one the bar occupies.
-    // Hit tests clamp to these so a hidden panel can still be triggered from its screen edge.
+    // Edge hit tests span from these to the panel's inner edge, so a hidden panel is still
+    // triggerable from its own edge without the bar's strip counting as part of it.
     readonly property real drawerLeft: barOnRight ? 0 : bar.implicitWidth
     readonly property real drawerRight: barOnRight ? width - bar.implicitWidth : width
 
@@ -46,11 +49,11 @@ CustomMouseArea {
     }
 
     function inLeftPanel(panel: Item, x: real, y: real): bool {
-        return x < Math.max(drawerLeft + Config.border.minThickness, panels.x + panel.x + panel.width) && withinPanelHeight(panel, x, y);
+        return x >= drawerLeft && x < Math.max(drawerLeft + Config.border.minThickness, panels.x + panel.x + panel.width) && withinPanelHeight(panel, x, y);
     }
 
     function inRightPanel(panel: Item, x: real, y: real): bool {
-        return x > Math.min(drawerRight - Config.border.minThickness, panels.x + panel.x) && withinPanelHeight(panel, x, y);
+        return x <= drawerRight && x > Math.min(drawerRight - Config.border.minThickness, panels.x + panel.x) && withinPanelHeight(panel, x, y);
     }
 
     // Hit tests against whichever screen edge the given panel group is docked to
@@ -69,8 +72,8 @@ CustomMouseArea {
     function atSidebarEdge(x: real): bool {
         const edge = panels.x + panels.sidebar.x;
         if (sidebarOnLeft)
-            return x < Math.max(drawerLeft + Config.border.minThickness, edge + panels.sidebar.width);
-        return x > Math.min(drawerRight - Config.border.minThickness, edge);
+            return x >= drawerLeft && x < Math.max(drawerLeft + Config.border.minThickness, edge + panels.sidebar.width);
+        return x <= drawerRight && x > Math.min(drawerRight - Config.border.minThickness, edge);
     }
 
     function inTopPanel(panel: Item, x: real, y: real): bool {
@@ -192,7 +195,7 @@ CustomMouseArea {
             }
         } else {
             const sidebarVisibleWidth = panels.sidebar.width * (1 - panels.sidebar.offsetScale);
-            const outOfSidebar = sidebarOnLeft ? x > panels.x + sidebarVisibleWidth : x < drawerRight - sidebarVisibleWidth;
+            const outOfSidebar = sidebarOnLeft ? x > drawerLeft + sidebarVisibleWidth : x < drawerRight - sidebarVisibleWidth;
             // Show osd on hover
             const showOsd = outOfSidebar && inSidebarPanel(panels.osdWrapper, x, y);
 

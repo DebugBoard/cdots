@@ -20,7 +20,9 @@ Item {
     // width when attached to a right side bar (which would fight a Behavior on x)
     property real detachProgress: content.isDetached ? 1 : 0
     readonly property real restingX: onRight ? parent.width - width : 0
-    readonly property real detachedX: (parent.width - content.nonAnimWidth) / 2
+    // Only tracked while detached: on close the detached content unloads and nonAnimWidth
+    // drops to 0, which would jerk the lerp target to the middle of the screen
+    property real detachedX
 
     visible: width > 0 && height > 0
     clip: true
@@ -49,6 +51,14 @@ Item {
             duration: content.animLength
             easing: content.animCurve
         }
+    }
+
+    Binding {
+        target: root
+        property: "detachedX"
+        value: (root.parent.width - content.nonAnimWidth) / 2
+        when: content.isDetached
+        restoreMode: Binding.RestoreNone
     }
 
     Behavior on y {

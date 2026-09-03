@@ -44,6 +44,9 @@ StyledWindow {
 
     readonly property bool barOnRight: contentItem.Config.bar.position === PanelPosition.Right
     readonly property bool sidebarOnLeft: contentItem.Config.sidebar.position === PanelPosition.Left
+    // Gap between the sidebar's screen edge and the drawer area, so its masks reach the
+    // edge. Just the border, unless the bar is docked on that same side.
+    readonly property real sidebarOuterInset: sidebarOnLeft ? panels.x : width - (panels.x + panels.width)
 
     property color surfaceColour: Colours.tPalette.m3surface
 
@@ -99,7 +102,7 @@ StyledWindow {
         Region {
             x: root.sidebarOnLeft ? 0 : root.width - width
             y: panels.osdWrapper.y + root.borderThickness
-            width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.borderThickness
+            width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.sidebarOuterInset
             height: panels.osd.height
         }
     }
