@@ -20,10 +20,13 @@ Item {
     required property Item utilitiesPanel
     readonly property int padding: Tokens.padding.large
     readonly property int clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
+    // Docks to the same screen edge as the sidebar
+    readonly property bool onLeft: Config.sidebar.position === PanelPosition.Left
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
-    anchors.right: parent.right
+    anchors.left: onLeft ? parent.left : undefined
+    anchors.right: onLeft ? undefined : parent.right
 
     implicitWidth: Tokens.sizes.notifs.width
     implicitHeight: {
@@ -60,7 +63,8 @@ Item {
         anchors.fill: parent
         anchors.margins: root.padding
         anchors.topMargin: root.clampedPadding
-        anchors.rightMargin: root.clampedPadding
+        anchors.leftMargin: root.onLeft ? root.clampedPadding : root.padding
+        anchors.rightMargin: root.onLeft ? root.padding : root.clampedPadding
 
         color: "transparent"
         radius: Tokens.rounding.large

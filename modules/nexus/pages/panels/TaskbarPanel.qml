@@ -16,9 +16,18 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-        // Behaviour
+        // Position
         SectionHeader {
             first: true
+            text: qsTr("Position")
+        }
+
+        PositionRows {
+            configKey: "bar"
+        }
+
+        // Behaviour
+        SectionHeader {
             text: qsTr("Behaviour")
         }
 

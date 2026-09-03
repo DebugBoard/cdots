@@ -14,7 +14,7 @@ Scope {
 
     ExclusionZone {
         anchors.left: true
-        exclusiveZone: root.bar.exclusiveZone
+        exclusiveZone: root.bar.onRight ? contentItem.Config.border.thickness : root.bar.exclusiveZone
     }
 
     ExclusionZone {
@@ -23,6 +23,7 @@ Scope {
 
     ExclusionZone {
         anchors.right: true
+        exclusiveZone: root.bar.onRight ? root.bar.exclusiveZone : contentItem.Config.border.thickness
     }
 
     ExclusionZone {

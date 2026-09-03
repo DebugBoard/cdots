@@ -16,6 +16,7 @@ Item {
     required property bool fullscreen
 
     readonly property bool disabled: Strings.testRegexList(Config.bar.excludedScreens, screen.name)
+    readonly property bool onRight: Config.bar.position === PanelPosition.Right
 
     readonly property int clampedWidth: Math.max(Config.border.minThickness, implicitWidth)
     readonly property int padding: Math.max(Tokens.padding.small, Config.border.thickness)
@@ -76,7 +77,9 @@ Item {
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.right: parent.right
+        // Pin the content to the inner edge so it slides out of the screen edge
+        anchors.left: root.onRight ? parent.left : undefined
+        anchors.right: root.onRight ? undefined : parent.right
 
         active: root.shouldBeVisible
 

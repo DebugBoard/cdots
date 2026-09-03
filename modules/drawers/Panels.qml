@@ -34,16 +34,28 @@ Item {
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
 
+    // The bar and the sidebar (along with the panels docked to it) can each be
+    // pinned to either side of the screen, independently and per monitor
+    readonly property bool barOnRight: Config.bar.position === PanelPosition.Right
+    readonly property bool sidebarOnLeft: Config.sidebar.position === PanelPosition.Left
+
+    // How far the panels stacked next to the sidebar have to be inset to clear it
+    readonly property real sidebarInset: sidebar.width * (1 - sidebar.offsetScale)
+    readonly property real sessionInset: sidebarInset + session.width * (1 - session.offsetScale)
+
     anchors.fill: parent
     anchors.margins: borderThickness
-    anchors.leftMargin: bar.implicitWidth
+    anchors.leftMargin: barOnRight ? borderThickness : bar.implicitWidth
+    anchors.rightMargin: barOnRight ? bar.implicitWidth : borderThickness
 
     Item {
         id: osdWrapper
 
         anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: sessionWrapper.anchors.rightMargin + session.width * (1 - session.offsetScale)
+        anchors.left: root.sidebarOnLeft ? parent.left : undefined
+        anchors.right: root.sidebarOnLeft ? undefined : parent.right
+        anchors.leftMargin: root.sidebarOnLeft ? root.sessionInset : 0
+        anchors.rightMargin: root.sidebarOnLeft ? 0 : root.sessionInset
         clip: sidebar.visible || session.visible
 
         implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
@@ -57,7 +69,8 @@ Item {
             sidebarOrSessionVisible: sidebar.visible || session.visible
 
             anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
+            anchors.left: root.sidebarOnLeft ? parent.left : undefined
+            anchors.right: root.sidebarOnLeft ? undefined : parent.right
         }
     }
 
@@ -71,15 +84,18 @@ Item {
         utilitiesPanel: utilities
 
         anchors.top: parent.top
-        anchors.right: parent.right
+        anchors.left: root.sidebarOnLeft ? parent.left : undefined
+        anchors.right: root.sidebarOnLeft ? undefined : parent.right
     }
 
     Item {
         id: sessionWrapper
 
         anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: sidebar.width * (1 - sidebar.offsetScale)
+        anchors.left: root.sidebarOnLeft ? parent.left : undefined
+        anchors.right: root.sidebarOnLeft ? undefined : parent.right
+        anchors.leftMargin: root.sidebarOnLeft ? root.sidebarInset : 0
+        anchors.rightMargin: root.sidebarOnLeft ? 0 : root.sidebarInset
         clip: sidebar.visible
 
         implicitWidth: session.implicitWidth * (1 - session.offsetScale)
@@ -92,7 +108,8 @@ Item {
             sidebarVisible: sidebar.visible
 
             anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
+            anchors.left: root.sidebarOnLeft ? parent.left : undefined
+            anchors.right: root.sidebarOnLeft ? undefined : parent.right
         }
     }
 
@@ -131,14 +148,16 @@ Item {
         popouts: popoutsWrapper.content
 
         anchors.bottom: parent.bottom
-        anchors.right: parent.right
+        anchors.left: root.sidebarOnLeft ? parent.left : undefined
+        anchors.right: root.sidebarOnLeft ? undefined : parent.right
     }
 
     Toasts.Toasts {
         id: toasts
 
         anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
-        anchors.right: sidebar.left
+        anchors.left: root.sidebarOnLeft ? sidebar.right : undefined
+        anchors.right: root.sidebarOnLeft ? undefined : sidebar.left
         anchors.margins: Tokens.padding.medium
     }
 
@@ -149,7 +168,8 @@ Item {
 
         anchors.top: notifications.bottom
         anchors.bottom: utilities.top
-        anchors.right: parent.right
+        anchors.left: root.sidebarOnLeft ? parent.left : undefined
+        anchors.right: root.sidebarOnLeft ? undefined : parent.right
         anchors.topMargin: -notifications.anchors.topMargin
     }
 }

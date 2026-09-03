@@ -16,6 +16,9 @@ Item {
     property bool hovered
     readonly property Brightness.Monitor monitor: Brightness.getMonitorForScreen(root.screen)
     readonly property bool shouldBeActive: screenState.osd && Config.osd.enabled && !(screenState.utilities && Config.utilities.enabled)
+    // Docks to the same screen edge as the sidebar
+    readonly property bool onLeft: Config.sidebar.position === PanelPosition.Left
+    readonly property real slideOffset: (-implicitWidth - 5 - sidebarOffset) * offsetScale
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarOffset: sidebarOrSessionVisible ? 12 : 0
 
@@ -39,7 +42,8 @@ Item {
     }
 
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+    anchors.leftMargin: onLeft ? slideOffset : 0
+    anchors.rightMargin: onLeft ? 0 : slideOffset
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
     opacity: 1 - offsetScale

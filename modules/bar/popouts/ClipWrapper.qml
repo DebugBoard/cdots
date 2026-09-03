@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.modules.bar.popouts // Need to import this module so the Wrapper type is the same as others
 
@@ -12,7 +13,14 @@ Item {
     required property real borderThickness
 
     readonly property alias content: content
-    property real offsetScale: x > 0 || content.hasCurrent ? 0 : 1
+    readonly property bool onRight: Config.bar.position === PanelPosition.Right
+    property real offsetScale: detachProgress > 0 || content.hasCurrent ? 0 : 1
+
+    // Lerped rather than animating x directly, as the resting x tracks the animating
+    // width when attached to a right side bar (which would fight a Behavior on x)
+    property real detachProgress: content.isDetached ? 1 : 0
+    readonly property real restingX: onRight ? parent.width - width : 0
+    readonly property real detachedX: (parent.width - content.nonAnimWidth) / 2
 
     visible: width > 0 && height > 0
     clip: true
@@ -20,7 +28,7 @@ Item {
     implicitWidth: content.implicitWidth * (1 - offsetScale)
     implicitHeight: content.implicitHeight
 
-    x: content.isDetached ? (parent.width - content.nonAnimWidth) / 2 : 0
+    x: restingX + (detachedX - restingX) * detachProgress
     y: {
         if (content.isDetached)
             return (parent.height - content.nonAnimHeight) / 2;
@@ -36,7 +44,7 @@ Item {
         Anim {}
     }
 
-    Behavior on x {
+    Behavior on detachProgress {
         Anim {
             duration: content.animLength
             easing: content.animCurve
@@ -59,7 +67,9 @@ Item {
         offsetScale: root.offsetScale
 
         anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: (-implicitWidth - 5) * root.offsetScale
+        anchors.left: root.onRight ? undefined : parent.left
+        anchors.right: root.onRight ? parent.right : undefined
+        anchors.leftMargin: root.onRight ? 0 : (-implicitWidth - 5) * root.offsetScale
+        anchors.rightMargin: root.onRight ? (-implicitWidth - 5) * root.offsetScale : 0
     }
 }

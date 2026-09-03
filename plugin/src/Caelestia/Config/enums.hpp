@@ -18,6 +18,7 @@ namespace caelestia::config {
                                                                                                                        \
     };
 
+ENUM(PanelPosition, Left, Right)
 ENUM(BarWorkspaceDisplay, Shapes, Text)
 ENUM(BarWorkspaceCapitalisation, Preserve, Upper, Lower)
 ENUM(LyricsBackend, Auto, Local, LRCLIB, NetEase)

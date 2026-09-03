@@ -25,6 +25,8 @@ Item {
         reloadableId: "utilities"
     }
     readonly property bool shouldBeActive: screenState.sidebar || (screenState.utilities && Config.utilities.enabled && !(screenState.session && Config.session.enabled))
+    // Docks to the same screen edge as the sidebar
+    readonly property bool onLeft: Config.sidebar.position === PanelPosition.Left
     readonly property real totalPadding: content.anchors.margins + CUtils.clamp(content.anchors.margins - Config.border.thickness, 0, content.anchors.margins)
     readonly property real nonAnimHeight: ((content.item as Content)?.nonAnimHeight ?? 0) + totalPadding
     property real offsetScale: shouldBeActive ? 0 : 1
@@ -74,7 +76,8 @@ Item {
         id: content
 
         anchors.top: parent.top
-        anchors.left: parent.left
+        anchors.left: root.onLeft ? undefined : parent.left
+        anchors.right: root.onLeft ? parent.right : undefined
         anchors.margins: Tokens.padding.large
 
         asynchronous: true

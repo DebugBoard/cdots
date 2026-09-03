@@ -19,6 +19,14 @@ PageBase {
 
         SectionHeader {
             first: true
+            text: qsTr("Position")
+        }
+
+        PositionRows {
+            configKey: "sidebar"
+        }
+
+        SectionHeader {
             text: qsTr("General")
         }
 

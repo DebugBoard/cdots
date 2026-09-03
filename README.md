@@ -208,13 +208,15 @@ Options set in these files will **override** the respective options in the globa
 per-monitor configs will inherit their values from the global config.
 
 
-For example, to automatically hide the bar on the monitor named `DP-1`:
+For example, to move the bar to the right hand side of the monitor named `DP-1` and
+automatically hide it there:
 
 **`~/.config/caelestia/monitors/DP-1/shell.json`**
 
 ```json
 {
     "bar": {
+        "position": "Right",
         "persistent": false
     }
 }
@@ -241,6 +243,21 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `utilities.vpn`: `enabled`, `provider`, `selectedProvider`
 >
 > </details>
+
+### Panel positions
+
+The bar and the sidebar can each be docked to either the `"Left"` or the `"Right"` edge of the
+screen, via `bar.position` and `sidebar.position`. Both are per-monitor options, so a monitor
+config can override them for a single screen.
+
+The sidebar shares its edge with the panels that stack against it, so `sidebar.position` also
+moves the notification popups, the OSD, the session menu, the utilities panel and toasts.
+The two options are independent: setting both to the same side simply puts the sidebar next
+to the bar.
+
+These can also be set from the shell itself, under
+<kbd>Settings</kbd> > <kbd>Panels</kbd> > <kbd>Taskbar</kbd>/<kbd>Sidebar</kbd> > <kbd>Position</kbd>,
+which lists every connected monitor separately.
 
 ### Example configuration
 
@@ -408,6 +425,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         }
     },
     "bar": {
+        "position": "Left",
         "persistent": true,
         "showOnHover": true,
         "dragThreshold": 20,
@@ -755,6 +773,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "sidebar": {
         "enabled": true,
+        "position": "Right",
         "showOnHover": false,
         "minHoverThreshold": 200,
         "dragThreshold": 80

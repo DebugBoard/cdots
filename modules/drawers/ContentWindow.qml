@@ -42,6 +42,9 @@ StyledWindow {
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
     readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
 
+    readonly property bool barOnRight: contentItem.Config.bar.position === PanelPosition.Right
+    readonly property bool sidebarOnLeft: contentItem.Config.sidebar.position === PanelPosition.Left
+
     property color surfaceColour: Colours.tPalette.m3surface
 
     readonly property int dragMaskPadding: {
@@ -88,13 +91,13 @@ StyledWindow {
     Region {
         id: emptyRegion
 
-        x: panels.notifications.x + bar.implicitWidth
+        x: panels.notifications.x + panels.x
         y: panels.notifications.y + root.borderThickness
         width: panels.notifications.width
         height: panels.notifications.height
 
         Region {
-            x: root.width - width
+            x: root.sidebarOnLeft ? 0 : root.width - width
             y: panels.osdWrapper.y + root.borderThickness
             width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.borderThickness
             height: panels.osd.height
@@ -168,8 +171,8 @@ StyledWindow {
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
             radius: root.borderRounding
-            borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset
-            borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
+            borderLeft: (root.barOnRight ? root.borderThickness : bar.implicitWidth) - anchors.margins - root.sdfBorderOffset
+            borderRight: (root.barOnRight ? bar.implicitWidth : root.borderThickness) - anchors.margins - root.sdfBorderOffset
             borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
             borderBottom: root.borderThickness - anchors.margins - root.sdfBorderOffset
         }
@@ -193,7 +196,7 @@ StyledWindow {
 
             panel: panels.sessionWrapper
             deformAmount: 0.2
-            x: panels.sessionWrapper.x + panels.session.x + bar.implicitWidth
+            x: panels.sessionWrapper.x + panels.session.x + panels.x
             implicitWidth: panels.session.width
         }
 
@@ -204,7 +207,8 @@ StyledWindow {
             deformAmount: 0.03
             implicitHeight: panel.height * (1 / rawDeformMatrix.m22) + 2
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
-            bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+            bottomLeftRadius: root.sidebarOnLeft ? radius : joinRadius
+            bottomRightRadius: root.sidebarOnLeft ? joinRadius : radius
         }
 
         PanelBg {
@@ -212,7 +216,7 @@ StyledWindow {
 
             panel: panels.osdWrapper
             deformAmount: 0.25
-            x: panels.osdWrapper.x + panels.osd.x + bar.implicitWidth
+            x: panels.osdWrapper.x + panels.osd.x + panels.x
             implicitWidth: panels.osd.width
         }
 
@@ -228,7 +232,8 @@ StyledWindow {
             panel: panels.utilities
             deformAmount: panels.sidebar.visible ? 0.1 : 0.15
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [sidebarBg]
-            topLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+            topLeftRadius: root.sidebarOnLeft ? radius : joinRadius
+            topRightRadius: root.sidebarOnLeft ? joinRadius : radius
         }
 
         PanelBg {
@@ -239,7 +244,7 @@ StyledWindow {
 
             panel: panels.popoutsWrapper
             deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
-            x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth - panels.popouts.width * extraWidth
+            x: panels.popoutsWrapper.x + panels.popouts.x + panels.x - (root.barOnRight ? 0 : panels.popouts.width * extraWidth)
             implicitWidth: panels.popouts.width * (1 + extraWidth)
 
             Behavior on extraWidth {
@@ -301,6 +306,8 @@ StyledWindow {
 
             anchors.top: parent.top
             anchors.bottom: parent.bottom
+            anchors.left: root.barOnRight ? undefined : parent.left
+            anchors.right: root.barOnRight ? parent.right : undefined
 
             screen: root.screen
             screenState: root.screenState
@@ -337,9 +344,11 @@ StyledWindow {
     component PanelBg: BlobRect {
         required property Item panel
         property real deformAmount: 0.15
+        // Rounding applied to the corner where the sidebar and utilities panels meet
+        readonly property real joinRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
 
         group: blobGroup
-        x: panel.x + bar.implicitWidth
+        x: panel.x + panels.x
         y: panel.y + root.borderThickness
         implicitWidth: panel.width
         implicitHeight: panel.height
